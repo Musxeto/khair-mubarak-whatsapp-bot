@@ -1,0 +1,23 @@
+# Ignore virtual environment
+env/
+
+# Ignore WhatsApp Web session data
+whatsapp_data/
+
+# Ignore browser drivers (if downloaded manually)
+geckodriver.log
+chromedriver.exe
+chromedriver
+geckodriver
+
+# Ignore compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore logs
+*.log
