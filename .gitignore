@@ -21,3 +21,6 @@ Thumbs.db
 
 # Ignore logs
 *.log
+
+node_modules/
+.wwebjs_auth/
