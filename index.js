@@ -1,41 +1,54 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 
-// Create a new WhatsApp client
 const client = new Client({
     authStrategy: new LocalAuth()
 });
 
-// Generate QR Code for authentication
 client.on('qr', (qr) => {
     console.log('Scan this QR code with your phone:');
     qrcode.generate(qr, { small: true });
 });
 
-// Once authenticated, the bot is ready
 client.on('ready', async () => {
     console.log('WhatsApp bot is ready!');
     
-    // Fetch unread messages
     const chats = await client.getChats();
     for (let chat of chats) {
-        let messages = await chat.fetchMessages({ limit: 50 }); // Fetch last 50 messages
+        let messages = await chat.fetchMessages({ limit: 50 });
+
+        if (messages.some(msg => containsKhair(msg.body))) continue;
+
         for (let message of messages) {
-            if (!message.isRead && message.body.toLowerCase().includes('eid')) {
-                await message.reply(`Khair Mubarak! 🌙✨\nاللهم بارك لنا في عيدنا واجعله مليئًا بالخير والبركات.\nMay this Eid bring you joy and countless blessings!`);
+            if (!message.isRead && containsEidGreeting(message.body)) {
+                await message.reply(getEidReply());
+                break;
             }
         }
     }
 });
 
-// Listen for incoming messages
 client.on('message', async (message) => {
     console.log(`Received message: ${message.body}`);
 
-    if (message.body.toLowerCase().includes('eid')) {
-        await message.reply(`Khair Mubarak! 🌙✨\nاللهم بارك لنا في عيدنا واجعله مليئًا بالخير والبركات.\nMay this Eid bring you joy and countless blessings!`);
+    const chat = await message.getChat();
+    const messages = await chat.fetchMessages({ limit: 50 });
+
+    if (messages.some(msg => containsKhair(msg.body))) return;
+
+    if (containsEidGreeting(message.body)) {
+        await message.reply(getEidReply());
     }
 });
+function containsEidGreeting(text) {
+    const eidKeywords = ["eid", "eid mubarak", "happy eid", "eid ul fitr", "eid ul adha", "mubarak"];
+    return eidKeywords.some(keyword => text.toLowerCase().includes(keyword));
+}
 
-// Start the bot
+function containsKhair(text) {
+    return text.toLowerCase().includes("khair");
+}
+function getEidReply() {
+    return `Khair Mubarak! 🌙✨\nاللهم بارك لنا في عيدنا واجعله مليئًا بالخير والبركات.\nMay this Eid bring you joy and countless blessings!`;
+}
 client.initialize();
